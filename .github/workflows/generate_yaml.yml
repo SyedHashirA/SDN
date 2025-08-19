@@ -3,7 +3,7 @@ name: Generate YAML Pipeline
 on:
   push:
     paths:
-      - 'svm.txt'   # Trigger only when .txt files change
+      - 'svm.py'   # Trigger only when .txt files change
     branches:
       - main       # You can change to your branch
 
