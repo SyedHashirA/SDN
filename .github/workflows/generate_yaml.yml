@@ -1,14 +1,46 @@
-script: |
-  import numpy as np
-  import matplotlib.pyplot as plt
-  import pandas as pd
-  from sklearn.svm import SVC
+name: Generate YAML
 
-  X = [[30],[40],[50],[60],[20],[10],[70]]
-  y = [0,1,1,1,0,0,1]
+on:
+  push:
+    branches:
+      - main   # or master, depending on your repo
 
-  classifier = SVC(kernel = 'linear', random_state = 0)
-  classifier.fit(X,y)
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  X_marks=[[55]]
-  print(classifier.predict(X_marks))
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Generate svm.yaml
+        run: |
+          python - << 'EOF'
+          import yaml
+          data = {
+              "model": {"type": "SVC", "kernel": "linear", "random_state": 0},
+              "data": {
+                  "X": [[30],[40],[50],[60],[20],[10],[70]],
+                  "y": [0,1,1,1,0,0,1],
+              },
+              "predict": {"input": [[55]]}
+          }
+          with open("svm.yaml", "w") as f:
+              yaml.dump(data, f, sort_keys=False)
+          EOF
+
+      - name: Commit YAML
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add svm.yaml
+          git commit -m "Auto-generate svm.yaml"
+          git push
