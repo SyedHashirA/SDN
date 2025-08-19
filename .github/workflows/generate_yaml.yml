@@ -1,41 +1,14 @@
-name: Generate YAML Pipeline
+script: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+  import pandas as pd
+  from sklearn.svm import SVC
 
-on:
-  push:
-    paths:
-      - 'svm.py'   # Trigger only when .txt files change
-    branches:
-      - main       # You can change to your branch
+  X = [[30],[40],[50],[60],[20],[10],[70]]
+  y = [0,1,1,1,0,0,1]
 
-jobs:
-  convert-to-yaml:
-    runs-on: ubuntu-latest
+  classifier = SVC(kernel = 'linear', random_state = 0)
+  classifier.fit(X,y)
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          pip install pyyaml
-
-      - name: Convert TXT to YAML
-        run: |
-          for file in *.txt; do
-            base=$(basename "$file" .txt)
-            echo "script: |" > "${base}.yaml"
-            sed 's/^/  /' "$file" >> "${base}.yaml"
-          done
-
-      - name: Commit YAML back to repo
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add *.yaml
-          git commit -m "Auto-generated YAML from TXT"
-          git push
+  X_marks=[[55]]
+  print(classifier.predict(X_marks))
