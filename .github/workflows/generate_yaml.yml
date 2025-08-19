@@ -1,0 +1,41 @@
+name: Generate YAML Pipeline
+
+on:
+  push:
+    paths:
+      - 'svm.txt'   # Trigger only when .txt files change
+    branches:
+      - main       # You can change to your branch
+
+jobs:
+  convert-to-yaml:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Convert TXT to YAML
+        run: |
+          for file in *.txt; do
+            base=$(basename "$file" .txt)
+            echo "script: |" > "${base}.yaml"
+            sed 's/^/  /' "$file" >> "${base}.yaml"
+          done
+
+      - name: Commit YAML back to repo
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add *.yaml
+          git commit -m "Auto-generated YAML from TXT"
+          git push
